@@ -73,7 +73,7 @@ LANGUAGE_NAMES = {
 }
 
 LANGUAGES = [LANG_C, LANG_CPP, LANG_PASCAL, LANG_PYTHON, LANG_PHP, LANG_JAVA]
-DEFAULT_LANGUAGES = [LANG_C, LANG_CPP, LANG_PASCAL]
+DEFAULT_LANGUAGES = [LANG_C, LANG_CPP, LANG_PYTHON, LANG_Java]
 
 # A reference for extension-based automatic language detection.
 # (It's more difficult with headers because ".h" is ambiguous.)
@@ -108,14 +108,6 @@ LANGUAGE_TO_OBJ_EXT_MAP = {
     LANG_C: ".o",
     LANG_CPP: ".o",
     LANG_PASCAL: ".o",
-}
-LANGUAGE_TO_BIN_EXT_MAP = {
-    LANG_C: "",
-    LANG_CPP: "",
-    LANG_PASCAL: "",
-    LANG_PYTHON: ".pyc",
-    LANG_PHP: ".php",
-    LANG_JAVA: ".class",
 }
 
 # Task score modes.

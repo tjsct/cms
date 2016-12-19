@@ -219,15 +219,14 @@ def get_compilation_commands(language, source_filenames, executable_filename,
         command = ["/usr/bin/gcc"]
         if for_evaluation:
             command += ["-DEVAL"]
-        command += ["-static", "-O2", "-std=c99", "-o", executable_filename]
+        command += ["-static", "-O2", "-lm", "-std=c99", "-o", executable_filename]
         command += source_filenames
-        command += ["-lm"]
         commands.append(command)
     elif language == LANG_CPP:
         command = ["/usr/bin/g++"]
         if for_evaluation:
             command += ["-DEVAL"]
-        command += ["-static", "-O2", "-std=c++11",
+        command += ["-static", "-O2", "-lm", "-std=c++11",
                     "-o", executable_filename]
         command += source_filenames
         commands.append(command)
@@ -246,21 +245,16 @@ def get_compilation_commands(language, source_filenames, executable_filename,
         # /usr/bin/python3 -m py_compile %s
         # mv __pycache__/%s.*.pyc %s
 
-        # use mv with python3 is unsafe
-        # as there can be multiple __pycache__/filename.*.pyc
-        py_command = ["/usr/bin/python3", "-c",
-                      "\"from py_compile import compile; " +
-                      "compile('{file}', '{file}c')\"".format(file=source_filenames[0]) ]
-        #mv_command = ["/bin/mv", "%s.pyc" % os.path.splitext(os.path.basename(
-        #              source_filenames[0]))[0], executable_filename]
+        # the location of pyc with Python3 is annoying, just do a syntax check and pass
+        # pyflakes is in jessie-backports
+        py_command = [["/usr/bin/python3", "-m", "pyflakes", source_filenames[0]]]
+        mv_command = ["/bin/mv", source_filenames[0], executable_filename]
         commands.append(py_command)
-        #commands.append(mv_command)
+        commands.append(mv_command)
     elif language == LANG_PHP:
-        pass
-        #command = ["/bin/cp", source_filenames[0], executable_filename]
-        #commands.append(command)
+        command = ["/bin/cp", source_filenames[0], executable_filename]
+        commands.append(command)
     elif language == LANG_JAVA:
-        #class_name = os.path.splitext(source_filenames[0])[0]
         command = ["/usr/bin/javac"] + source_filenames
         commands.append(command)
     else:
@@ -286,7 +280,8 @@ def get_evaluation_commands(language, executable_filename):
         command = [os.path.join(".", executable_filename)]
         commands.append(command)
     elif language == LANG_JAVA:
-        command = ["/usr/bin/java", executable_filename]
+        class_name = os.path.splitext(os.path.basename(executable_filename))[0]
+        command = ["/usr/bin/java", "-d64", "-Xmx128M", class_name]
         commands.append(command)
     elif language == LANG_PYTHON:
         # In order to use Python 3 change it to:
@@ -355,7 +350,7 @@ def compilation_step(sandbox, commands):
     sandbox.max_processes = None
     sandbox.timeout = 10
     sandbox.wallclock_timeout = 20
-    sandbox.address_space = 512 * 1024
+    sandbox.address_space = 1536 * 1024
     sandbox.stdout_file = "compiler_stdout.txt"
     sandbox.stderr_file = "compiler_stderr.txt"
 
@@ -510,6 +505,9 @@ def evaluation_step_before_run(sandbox, command,
     writable_files = [] if writable_files is None else writable_files
 
     # Set sandbox parameters suitable for evaluation.
+    sandbox.dirs += [("/etc", None, None)]
+    sandbox.preserve_env = True
+
     if time_limit > 0:
         sandbox.timeout = time_limit
         sandbox.wallclock_timeout = 2 * time_limit + 1
