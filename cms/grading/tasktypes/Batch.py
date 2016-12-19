@@ -27,7 +27,7 @@ from __future__ import unicode_literals
 import logging
 
 from cms import LANGUAGES, LANGUAGE_TO_SOURCE_EXT_MAP, \
-    LANGUAGE_TO_HEADER_EXT_MAP, LANGUAGE_TO_OBJ_EXT_MAP
+    LANGUAGE_TO_HEADER_EXT_MAP, LANGUAGE_TO_OBJ_EXT_MAP, LANGUAGE_TO_BIN_EXT_MAP
 from cms.grading import get_compilation_commands, get_evaluation_commands, \
     compilation_step, evaluation_step, human_evaluation_message, \
     is_evaluation_passed, extract_outcome_and_text, white_diff_step
@@ -190,7 +190,7 @@ class Batch(TaskType):
             sandbox.create_file_from_storage(filename, digest)
 
         # Prepare the compilation command
-        executable_filename = format_filename.replace(".%l", "")
+        executable_filename = format_filename.replace(".%l", LANGUAGE_TO_BIN_EXT_MAP[language])
         commands = get_compilation_commands(language,
                                             source_filenames,
                                             executable_filename)

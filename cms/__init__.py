@@ -109,6 +109,14 @@ LANGUAGE_TO_OBJ_EXT_MAP = {
     LANG_CPP: ".o",
     LANG_PASCAL: ".o",
 }
+LANGUAGE_TO_BIN_EXT_MAP = {
+    LANG_C: "",
+    LANG_CPP: "",
+    LANG_PASCAL: "",
+    LANG_PYTHON: ".pyc",
+    LANG_PHP: ".php",
+    LANG_JAVA: ".class",
+}
 
 # Task score modes.
 

@@ -219,7 +219,7 @@ def get_compilation_commands(language, source_filenames, executable_filename,
         command = ["/usr/bin/gcc"]
         if for_evaluation:
             command += ["-DEVAL"]
-        command += ["-static", "-O2", "-o", executable_filename]
+        command += ["-static", "-O2", "-std=c99", "-o", executable_filename]
         command += source_filenames
         command += ["-lm"]
         commands.append(command)
@@ -245,19 +245,23 @@ def get_compilation_commands(language, source_filenames, executable_filename,
         # In order to use Python 3 change them to:
         # /usr/bin/python3 -m py_compile %s
         # mv __pycache__/%s.*.pyc %s
-        py_command = ["/usr/bin/python2", "-m", "py_compile",
-                      source_filenames[0]]
-        mv_command = ["/bin/mv", "%s.pyc" % os.path.splitext(os.path.basename(
-                      source_filenames[0]))[0], executable_filename]
+
+        # use mv with python3 is unsafe
+        # as there can be multiple __pycache__/filename.*.pyc
+        py_command = ["/usr/bin/python3", "-c",
+                      "\"from py_compile import compile; " +
+                      "compile('{file}', '{file}c')\"".format(file=source_filenames[0]) ]
+        #mv_command = ["/bin/mv", "%s.pyc" % os.path.splitext(os.path.basename(
+        #              source_filenames[0]))[0], executable_filename]
         commands.append(py_command)
-        commands.append(mv_command)
+        #commands.append(mv_command)
     elif language == LANG_PHP:
-        command = ["/bin/cp", source_filenames[0], executable_filename]
-        commands.append(command)
+        pass
+        #command = ["/bin/cp", source_filenames[0], executable_filename]
+        #commands.append(command)
     elif language == LANG_JAVA:
-        class_name = os.path.splitext(source_filenames[0])[0]
-        command = ["/usr/bin/gcj", "--main=%s" % class_name, "-O3", "-o",
-                   executable_filename] + source_filenames
+        #class_name = os.path.splitext(source_filenames[0])[0]
+        command = ["/usr/bin/javac"] + source_filenames
         commands.append(command)
     else:
         raise ValueError("Unknown language %s." % language)
@@ -278,13 +282,16 @@ def get_evaluation_commands(language, executable_filename):
 
     """
     commands = []
-    if language in (LANG_C, LANG_CPP, LANG_PASCAL, LANG_JAVA):
+    if language in (LANG_C, LANG_CPP, LANG_PASCAL):
         command = [os.path.join(".", executable_filename)]
+        commands.append(command)
+    elif language == LANG_JAVA:
+        command = ["/usr/bin/java", executable_filename]
         commands.append(command)
     elif language == LANG_PYTHON:
         # In order to use Python 3 change it to:
         # /usr/bin/python3 %s
-        command = ["/usr/bin/python2", executable_filename]
+        command = ["/usr/bin/python3", executable_filename]
         commands.append(command)
     elif language == LANG_PHP:
         command = ["/usr/bin/php5", executable_filename]
