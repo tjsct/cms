@@ -94,10 +94,6 @@
         <col style="width: 60%"/>
     </colgroup>
     <tbody>
-        <tr>
-            <th>{{ _("Type") }}</th>
-            <td colspan="2">{% set task_type = get_task_type(dataset=task.active_dataset) %}{{ task_type.name }}</td>
-        </tr>
 {% if task.active_dataset.time_limit is not None %}
         <tr>
             <th>{{ _("Time limit") }}</th>
@@ -128,9 +124,7 @@
         {% end %}
     <td>{{ LANGUAGE_NAMES[l] }}</td>
     <td class="compilation_command_cell">
-{% for cmd in c %}
-        <code class="compilation_command">{{ " ".join(cmd) }}</code>
-{% end %}
+        <code class="compilation_command">{{ " ".join(c[0]) }}</code>
     </td>
     {% end %}
 </tr>
