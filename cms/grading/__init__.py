@@ -363,11 +363,13 @@ def compilation_step(sandbox, commands):
     # Actually run the compilation commands.
     logger.debug("Starting compilation step.")
     for command in commands:
-        box_success = sandbox.execute_without_std(command, wait=True)
-        if not box_success:
+        box_code = sandbox.execute_without_std_with_status(command)
+        if box_code == 2:
             logger.error("Compilation aborted because of "
                          "sandbox error in `%s'.", sandbox.path)
             return False, None, None, None
+        elif box_code == 1:
+            break
 
     # Detect the outcome of the compilation.
     exit_status = sandbox.get_exit_status()

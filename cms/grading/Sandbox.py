@@ -1264,6 +1264,20 @@ class IsolateSandbox(SandboxBase):
         else:
             return popen
 
+    def execute_without_std_with_status(self, command):
+        """Lazy hack, we want the status code.
+    	Blame senioritis for this badly written method
+    	--SHY
+        """
+        popen = self._popen(command, stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            close_fds=True)
+
+        # If the caller wants us to wait for completion, we also avoid
+        # std*** to interfere with command. Otherwise we let the
+        # caller handle these issues.
+        return wait_without_std([popen])[0]
+
     def translate_box_exitcode(self, exitcode):
         """Translate the sandbox exit code according to the
         following table:
