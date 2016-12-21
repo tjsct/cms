@@ -112,6 +112,7 @@
             <td colspan="2">{{ _("%(mb)d MiB") % {"mb": task.active_dataset.memory_limit} }}</td>
         </tr>
 {% end %}
+{% set task_type = get_task_type(dataset=task.active_dataset) %}
 {% set compilation_commands = task_type.get_compilation_commands([x.filename for x in task.submission_format]) %}
 {% if compilation_commands is not None %}
 {% set compilation_commands = {lang: compilation_commands[lang] for lang in contest.languages} %}
