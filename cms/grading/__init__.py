@@ -244,19 +244,26 @@ def get_compilation_commands(language, source_filenames, executable_filename,
         # In order to use Python 3 change them to:
         # /usr/bin/python3 -m py_compile %s
         # mv __pycache__/%s.*.pyc %s
+        class_name = os.path.splitext(os.path.basename(source_filenames[0]))[0]
 
-        # the location of pyc with Python3 is annoying, just do a syntax check and pass
-        # pyflakes is in jessie-backports
-        py_command = [["/usr/bin/python3", "-m", "pyflakes", source_filenames[0]]]
-        mv_command = ["/bin/mv", source_filenames[0], executable_filename]
+        py_command = ["/usr/bin/python3", "-OO", "-m", "py_compile", source_filenames[0]]
+        mv_command = ["/bin/bash", "-c", "/bin/mv __pycache__/%s.*.py* %s" % (class_name, executable_filename)]
         commands.append(py_command)
         commands.append(mv_command)
     elif language == LANG_PHP:
         command = ["/bin/cp", source_filenames[0], executable_filename]
         commands.append(command)
     elif language == LANG_JAVA:
+        class_name = os.path.splitext(os.path.basename(source_filenames[0]))[0]
+
         command = ["/usr/bin/javac"] + source_filenames
+        jar_command = ["/bin/bash", "-c", "/usr/bin/jar c0fe {cl}.jar {cl} *.class".format(cl=class_name)]
+        mv_command = ["/bin/mv", "%s.jar" % class_name, executable_filename]
+
         commands.append(command)
+        commands.append(jar_command)
+        commands.append(mv_command)
+
     else:
         raise ValueError("Unknown language %s." % language)
     return commands
@@ -280,8 +287,7 @@ def get_evaluation_commands(language, executable_filename):
         command = [os.path.join(".", executable_filename)]
         commands.append(command)
     elif language == LANG_JAVA:
-        class_name = os.path.splitext(os.path.basename(executable_filename))[0]
-        command = ["/usr/bin/java", "-d64", "-Xmx128M", class_name]
+        command = ["/usr/bin/java", "-Xss64M", "-Xmx512M", "-jar", executable_filename]
         commands.append(command)
     elif language == LANG_PYTHON:
         # In order to use Python 3 change it to:
@@ -350,7 +356,7 @@ def compilation_step(sandbox, commands):
     sandbox.max_processes = None
     sandbox.timeout = 10
     sandbox.wallclock_timeout = 20
-    sandbox.address_space = 1536 * 1024
+    sandbox.address_space = 512 * 1024
     sandbox.stdout_file = "compiler_stdout.txt"
     sandbox.stderr_file = "compiler_stderr.txt"
 

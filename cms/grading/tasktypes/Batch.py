@@ -190,13 +190,8 @@ class Batch(TaskType):
         for filename, digest in files_to_get.iteritems():
             sandbox.create_file_from_storage(filename, digest)
 
-        # Prepare the compilation command
-        # Java workaround
-        if language == LANG_JAVA:
-            executable_filename = format_filename.replace(".%l", ".class")
-        else:
-            executable_filename = format_filename.replace(".%l", "")
 
+        executable_filename = format_filename.replace(".%l", "")
         commands = get_compilation_commands(language,
                                             source_filenames,
                                             executable_filename)
