@@ -137,10 +137,10 @@ EVALUATION_MESSAGES = MessageCollection([
                  N_("Output is correct"),
                  N_("Your submission ran and gave the correct answer")),
     HumanMessage("wrong",
-                 N_("Output isn't correct"),
+                 N_("Output is incorrect"),
                  N_("Your submission ran, but gave the wrong answer")),
     HumanMessage("nooutput",
-                 N_("Evaluation didn't produce file %s"),
+                 N_("Cannot find output file %s"),
                  N_("Your submission ran, but did not write on the "
                     "correct output file")),
     HumanMessage("timeout",
